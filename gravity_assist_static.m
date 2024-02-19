@@ -18,14 +18,16 @@ planetVel = [0,0,0];
 
 % animation
 
-curve = animatedline('LineWidth',1);
+curve1 = animatedline('LineWidth',1);
+curve2 = animatedline('LineWidth',1);
 set(gca,'XLim',[-200,200],'YLim',[-200,200],'ZLim',[-200,200]);
 
 hold on;
 grid on;
 
 for i=1:TIME_STEP_TOTAL
-    addpoints(curve,spacecraftPos(1),spacecraftPos(2),spacecraftPos(3));
+    addpoints(curve1,spacecraftPos(1),spacecraftPos(2),spacecraftPos(3));
+    addpoints(curve2,planetPos(1),planetPos(2),planetPos(3));
     head1 = scatter3(spacecraftPos(1),spacecraftPos(2),spacecraftPos(3),1,'red');
     head2 = scatter3(planetPos(1),planetPos(2),planetPos(3),10,'blue');
 
