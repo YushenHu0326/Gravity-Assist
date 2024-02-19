@@ -22,6 +22,7 @@ curve = animatedline('LineWidth',1);
 set(gca,'XLim',[-200,200],'YLim',[-200,200],'ZLim',[-200,200]);
 
 hold on;
+grid on;
 
 for i=1:TIME_STEP_TOTAL
     addpoints(curve,spacecraftPos(1),spacecraftPos(2),spacecraftPos(3));
