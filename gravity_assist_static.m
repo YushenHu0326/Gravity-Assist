@@ -6,15 +6,25 @@ function proj = vec2vecProj(a,b)
     proj = [b(1)*p,b(2)*p,b(3)*p];
 end
 
+function v = updateVelocity(v0,a)
+    v = [v0(1)+a(1),v0(2)+a(2),v0(3)+a(3)];
+end
+
+function p = updatePosition(p0,v)
+    p = [p0(1)+v(1),p0(2)+v(2),p0(3)+v(3)];
+end
+
 % properties
 
 TIME_STEP_TOTAL = 1000;
 
 spacecraftPos = [-100,-100,0];
 spacecraftVel = [0.1,0.1,0.1];
+spacecraftAcc = [0,0,0];
 
 planetPos = [0,0,0];
 planetVel = [0,0,0];
+planetAcc = [0,0,0];
 
 % animation
 
@@ -37,13 +47,11 @@ for i=1:TIME_STEP_TOTAL
     delete(head1);
     delete(head2);
 
-    spacecraftPos(1) = spacecraftPos(1) + spacecraftVel(1);
-    spacecraftPos(2) = spacecraftPos(2) + spacecraftVel(2);
-    spacecraftPos(3) = spacecraftPos(3) + spacecraftVel(3);
+    spacecraftPos = updatePosition(spacecraftPos,spacecraftVel);
+    planetPos = updatePosition(planetPos,planetVel);
 
-    planetPos(1) = planetPos(1) + planetVel(1);
-    planetPos(2) = planetPos(2) + planetVel(2);
-    planetPos(3) = planetPos(3) + planetVel(3);
+    spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
+    planetVel = updateVelocity(planetVel,planetAcc);
 end
 
 end
