@@ -1,4 +1,4 @@
-function gravity_assist_static()
+function gravity_assist_simple()
 
 % helper functions
 function proj = vec2vecProj(a,b)
