@@ -33,12 +33,12 @@ end
 
 spacecraftM = 1000;
 spacecraftPos = [-0.5,-2,0];
-spacecraftVel = [0,0.01,0];
+spacecraftVel = [0,0.02,0];
 spacecraftAcc = [0,0,0];
 
 planetM = 6.39e+23;
 planetPos = [0,0,0];
-planetVel = [0,0,0];
+planetVel = [0,0.005,0];
 planetAcc = [0,0,0];
 
 % animation
@@ -68,8 +68,10 @@ for i=1:TIME_STEP_TOTAL
     planetPos = updatePosition(planetPos,planetVel);
 
     gm = calculateGravity(spacecraftPos,planetPos,spacecraftM,planetM);
+    gM = calculateGravity(planetPos,spacecraftPos,planetM,spacecraftM);
 
     spacecraftAcc = updateAcceleration(spacecraftAcc,spacecraftM,gm);
+    planetAcc = updateAcceleration(planetAcc,planetM,gM);
 
     spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
     planetVel = updateVelocity(planetVel,planetAcc);
