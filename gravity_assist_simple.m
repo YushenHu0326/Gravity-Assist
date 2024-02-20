@@ -1,5 +1,8 @@
 function gravity_assist_simple()
 
+clear global;
+close all;
+
 % constant
 
 % in Nm^2/kg^2
@@ -8,10 +11,7 @@ G = 6.6743e-11;
 % in days
 TIME_STEP_TOTAL = 500;
 
-TIME_STEP = 60*60*24;
-
-% length scale in million km
-DISTANCE = 1e+9;
+TIME_STEP = 60*30;
 
 % helper functions
 
@@ -31,8 +31,8 @@ function a = updateAcceleration(m,f)
 end
 
 function v = updateVelocity(v0,a)
-    % calculate velocity in million km/s
-    v = v0+a/DISTANCE;
+    % calculate velocity in m/s
+    v = v0+a*TIME_STEP;
 end
 
 function p = updatePosition(p0,v)
@@ -44,24 +44,24 @@ end
 
 % mass in kg
 spacecraftM = 1000;
-% position in million km
-spacecraftPos = [-5,-.5,-1.8];
-% velocity in million km/s
-spacecraftVel = [0.15e-6,0.05e-6,0.05e-6];
+% position in m
+spacecraftPos = [-1e+9,-.5e+9,-1.8e+9];
+% velocity in m/s
+spacecraftVel = [8e+3,5e+3,5e+3];
 % acceleration in m/s^2
 spacecraftAcc = [0,0,0];
 
 % same for the planet
-planetM = 6.39e+28;
-planetPos = [0,-5,0];
-planetVel = [0,0.2e-6,0];
+planetM = 1e+46;
+planetPos = [0,-5e+9,0];
+planetVel = [0,40e+3,0];
 planetAcc = [0,0,0];
 
 % animation
 
 curve1 = animatedline('LineWidth',1);
 curve2 = animatedline('LineWidth',1);
-set(gca,'XLim',[-10,10],'YLim',[-10,10],'ZLim',[-10,10]);
+set(gca,'XLim',[-1e+10,1e+10],'YLim',[-1e+10,1e+10],'ZLim',[-1e+10,1e+10]);
 
 hold on;
 grid on;
