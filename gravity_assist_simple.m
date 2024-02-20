@@ -9,7 +9,7 @@ close all;
 G = 6.6743e-11;
 
 % in days
-TIME_STEP_TOTAL = 500;
+TIME_STEP_TOTAL = 200;
 
 TIME_STEP = 60*30;
 
@@ -18,8 +18,6 @@ TIME_STEP = 60*30;
 function gravity = calculateGravity(p1,p2,m,M)
     % delta in position (million km)
     d = p2-p1;
-    % convert million km to m
-    d = d*1e+9;
     % calculate gravity in kgm/s^2
     g = G*m*M/(norm(d)*norm(d));
     gravity = g*d/norm(d);
@@ -52,7 +50,7 @@ spacecraftVel = [8e+3,5e+3,5e+3];
 spacecraftAcc = [0,0,0];
 
 % same for the planet
-planetM = 1e+46;
+planetM = 1e+28;
 planetPos = [0,-5e+9,0];
 planetVel = [0,40e+3,0];
 planetAcc = [0,0,0];
