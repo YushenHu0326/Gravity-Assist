@@ -1,5 +1,8 @@
 function gravity_assist_system()
 
+clear global;
+close all;
+
 % constant
 
 % in Nm^2/kg^2
@@ -10,16 +13,13 @@ TIME_STEP_TOTAL = 1000;
 
 TIME_STEP = 60*60*24;
 
-% length scale in million km
-DISTANCE = 1e+9;
+DAYS_PER_TIME_STEP = 30;
 
 % helper functions
 
 function gravity = calculateGravity(p1,p2,m,M)
     % delta in position (million km)
     d = p2-p1;
-    % convert million km to m
-    d = d*1e+9;
     % calculate gravity in kgm/s^2
     g = G*m*M/(norm(d)*norm(d));
     gravity = g*d/norm(d);
@@ -31,8 +31,8 @@ function a = updateAcceleration(m,f)
 end
 
 function v = updateVelocity(v0,a)
-    % calculate velocity in million km/s
-    v = v0+a/DISTANCE;
+    % calculate velocity in m/s
+    v = v0+a*TIME_STEP;
 end
 
 function p = updatePosition(p0,v)
@@ -42,36 +42,55 @@ end
 
 % properties
 
+tVoyage = 50;
+
 % mass in kg
 spacecraftM = 1000;
-% position in million km
-spacecraftPos = [-5,-.5,-1.8];
-% velocity in million km/s
-spacecraftVel = [0.15e-6,0.05e-6,0.05e-6];
+% position in m
+spacecraftPos = [-0.5*(sqrt(2*G*1.989e+30)*365.25*24*60*60/pi)^(2/3),0,0];
+% velocity in m/s
+spacecraftVel = [0,-40e+3,0];
 % acceleration in m/s^2
 spacecraftAcc = [0,0,0];
 
 % same for the planet & star
-starM = 4e+34;
+starM = 1.989e+30;
 starPos = [0,0,0];
 starVel = [0,0,0];
 starAcc = [0,0,0];
 
-planet1M = 6.39e+27;
-planet1Pos = [0,-50,0];
-planet1Vel = [0.2e-4,0,0];
+planet1Res = 0.5*(sqrt(2*G*starM)*365.25*24*60*60/pi)^(2/3); 
+planet1M = 5.9722e+24;
+planet1Pos = [-planet1Res,0,0];
+planet1Vel = [0,-sqrt(G*starM/planet1Res),0];
 planet1Acc = [0,0,0];
 
-planet2M = 3.39e+27;
-planet2Pos = [0,30,0];
-planet2Vel = [-0.2e-4,0,0];
+planet2Res = 0.5*(sqrt(2*G*starM)*4331*24*60*60/pi)^(2/3); 
+planet2M = 1898e+24;
+planet2Pos = [-planet2Res,0,0];
+planet2Vel = [0,-sqrt(G*starM/planet2Res),0];
 planet2Acc = [0,0,0];
+
+planet3Res = 0.5*(sqrt(2*G*starM)*10747*24*60*60/pi)^(2/3); 
+planet3M = 568e+24;
+planet3Pos = [-planet3Res,0,0];
+planet3Vel = [0,-sqrt(G*starM/planet3Res),0];
+planet3Acc = [0,0,0];
+
+planet4Res = 0.5*(sqrt(2*G*starM)*30589*24*60*60/pi)^(2/3); 
+planet4M = 86.8e+24;
+planet4Pos = [-planet4Res,0,0];
+planet4Vel = [0,-sqrt(G*starM/planet4Res),0];
+planet4Acc = [0,0,0];
 
 % animation
 
-curve1 = animatedline('LineWidth',1);
-curve2 = animatedline('LineWidth',1);
-set(gca,'XLim',[-100,100],'YLim',[-100,100],'ZLim',[-100,100]);
+curve1 = animatedline('LineWidth',1,'Color','red');
+curve2 = animatedline('LineWidth',1,'Color','blue');
+curve3 = animatedline('LineWidth',1,'Color','yellow');
+curve4 = animatedline('LineWidth',1,'Color','green');
+curve5 = animatedline('LineWidth',1,'Color','magenta');
+set(gca,'XLim',[-5e+12,5e+12],'YLim',[-5e+12,5e+12],'ZLim',[-5e+12,5e+12]);
 
 hold on;
 grid on;
@@ -79,8 +98,15 @@ grid on;
 for i=1:TIME_STEP_TOTAL
     addpoints(curve1,planet1Pos(1),planet1Pos(2),planet1Pos(3));
     addpoints(curve2,planet2Pos(1),planet2Pos(2),planet2Pos(3));
-    head1 = scatter3(planet1Pos(1),planet1Pos(2),planet1Pos(3),50,'red');
-    head2 = scatter3(planet2Pos(1),planet2Pos(2),planet2Pos(3),50,'blue');
+    addpoints(curve3,planet3Pos(1),planet3Pos(2),planet3Pos(3));
+    addpoints(curve4,planet4Pos(1),planet4Pos(2),planet4Pos(3));
+    addpoints(curve5,spacecraftPos(1),spacecraftPos(2),spacecraftPos(3));
+
+    head1 = scatter3(planet1Pos(1),planet1Pos(2),planet1Pos(3),5,'red');
+    head2 = scatter3(planet2Pos(1),planet2Pos(2),planet2Pos(3),10,'blue');
+    head3 = scatter3(planet3Pos(1),planet3Pos(2),planet3Pos(3),50,'yellow');
+    head4 = scatter3(planet4Pos(1),planet4Pos(2),planet4Pos(3),100,'green');
+    head5 = scatter3(spacecraftPos(1),spacecraftPos(2),spacecraftPos(3),2,'magenta');
 
     drawnow
     pause(0.01);
@@ -88,21 +114,42 @@ for i=1:TIME_STEP_TOTAL
     if i ~= TIME_STEP_TOTAL
         delete(head1);
         delete(head2);
+        delete(head3);
+        delete(head4);
+        delete(head5);
     end
+    
+    for j =1:DAYS_PER_TIME_STEP
+        planet1Pos = updatePosition(planet1Pos,planet1Vel);
+        planet2Pos = updatePosition(planet2Pos,planet2Vel);
+        planet3Pos = updatePosition(planet3Pos,planet3Vel);
+        planet4Pos = updatePosition(planet4Pos,planet4Vel);
 
-    planet1Pos = updatePosition(planet1Pos,planet1Vel);
-    planet2Pos = updatePosition(planet2Pos,planet2Vel);
+        gM1 = calculateGravity(planet1Pos,starPos,planet1M,starM);
+        gM2 = calculateGravity(planet2Pos,starPos,planet2M,starM);
+        gM3 = calculateGravity(planet3Pos,starPos,planet3M,starM);
+        gM4 = calculateGravity(planet4Pos,starPos,planet4M,starM);
 
-    gM1 = calculateGravity(planet1Pos,starPos,planet1M,starM);
-    gM2 = calculateGravity(planet2Pos,starPos,planet2M,starM);
+        planet1Acc = updateAcceleration(planet1M,gM1);
+        planet2Acc = updateAcceleration(planet2M,gM2);
+        planet3Acc = updateAcceleration(planet3M,gM3);
+        planet4Acc = updateAcceleration(planet4M,gM4);
 
-    planet1Acc = updateAcceleration(planet1M,gM1);
-    planet2Acc = updateAcceleration(planet2M,gM2);
-
-    planet1Vel = updateVelocity(planet1Vel,planet1Acc);
-    planet2Vel = updateVelocity(planet2Vel,planet2Acc);
-
-    disp(planet1Pos)
+        planet1Vel = updateVelocity(planet1Vel,planet1Acc);
+        planet2Vel = updateVelocity(planet2Vel,planet2Acc);
+        planet3Vel = updateVelocity(planet3Vel,planet3Acc);
+        planet4Vel = updateVelocity(planet4Vel,planet4Acc);
+        
+        spacecraftPos = updatePosition(spacecraftPos,spacecraftVel);
+        gm = calculateGravity(spacecraftPos,starPos,spacecraftM,starM);
+        %gm = gm + calculateGravity(spacecraftPos,planet1Pos,spacecraftM,planet1M);
+        gm = gm + calculateGravity(spacecraftPos,planet2Pos,spacecraftM,planet2M);
+        gm = gm + calculateGravity(spacecraftPos,planet3Pos,spacecraftM,planet3M);
+        gm = gm + calculateGravity(spacecraftPos,planet4Pos,spacecraftM,planet4M);
+        spacecraftAcc = updateAcceleration(spacecraftM,gm);
+        spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
+        %disp(spacecraftPos)
+    end
 end
 
 end
