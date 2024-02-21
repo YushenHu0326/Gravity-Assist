@@ -75,13 +75,13 @@ planet1Pos = [-planet1Res,0,0];
 planet1Vel = [0,-sqrt(G*starM/planet1Res),0];
 planet1Acc = [0,0,0];
 
-planet2Res = 0.5*(sqrt(2*G*starM)*3753*24*60*60/pi)^(2/3); 
+planet2Res = 0.5*(sqrt(2*G*starM)*3757*24*60*60/pi)^(2/3); 
 planet2M = 1898e+24;
 planet2Pos = [-planet2Res,0,0];
 planet2Vel = [0,-sqrt(G*starM/planet2Res),0];
 planet2Acc = [0,0,0];
 
-planet3Res = 0.5*(sqrt(2*G*starM)*12600*24*60*60/pi)^(2/3); 
+planet3Res = 0.5*(sqrt(2*G*starM)*12000*24*60*60/pi)^(2/3); 
 planet3M = 568e+24;
 planet3Pos = [-planet3Res,0,0];
 planet3Vel = [0,-sqrt(G*starM/planet3Res),0];
