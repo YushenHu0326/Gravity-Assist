@@ -13,17 +13,17 @@ TIME_STEP_TOTAL = 1000;
 
 TIME_STEP = 60*60*24;
 
-DAYS_PER_TIME_STEP = 30;
+DAYS_PER_TIME_STEP = 10;
 
-TACC_1 = 1;
+TACC_1 = 290;
 TACC_2 = -1;
 TACC_3 = -1;
 TACC_4 = -1;
 
-A_1 = [1e-8,0,0];
-A_2 = 1e-2;
-A_3 = 1e-2;
-A_4 = 1e-2;
+A_1 = 0.1;
+A_2 = 0.1;
+A_3 = 0.1;
+A_4 = 0.1;
 
 % helper functions
 
@@ -52,14 +52,12 @@ end
 
 % properties
 
-tVoyage = 50;
-
 % mass in kg
 spacecraftM = 1000;
 % position in m
 spacecraftPos = [-0.5*(sqrt(2*G*1.989e+30)*365.25*24*60*60/pi)^(2/3),0,0];
 % velocity in m/s
-spacecraftVel = [0,-40e+3,0];
+spacecraftVel = [0,-sqrt((G*1.989e+30)/(0.5*(sqrt(2*G*1.989e+30)*365.25*24*60*60/pi)^(2/3))),0];
 % acceleration in m/s^2
 spacecraftAcc = [0,0,0];
 
@@ -75,13 +73,13 @@ planet1Pos = [-planet1Res,0,0];
 planet1Vel = [0,-sqrt(G*starM/planet1Res),0];
 planet1Acc = [0,0,0];
 
-planet2Res = 0.5*(sqrt(2*G*starM)*3757*24*60*60/pi)^(2/3); 
+planet2Res = 0.5*(sqrt(2*G*starM)*4331*24*60*60/pi)^(2/3); 
 planet2M = 1898e+24;
 planet2Pos = [-planet2Res,0,0];
 planet2Vel = [0,-sqrt(G*starM/planet2Res),0];
 planet2Acc = [0,0,0];
 
-planet3Res = 0.5*(sqrt(2*G*starM)*12000*24*60*60/pi)^(2/3); 
+planet3Res = 0.5*(sqrt(2*G*starM)*10747*24*60*60/pi)^(2/3); 
 planet3M = 568e+24;
 planet3Pos = [-planet3Res,0,0];
 planet3Vel = [0,-sqrt(G*starM/planet3Res),0];
@@ -157,13 +155,13 @@ for i=1:TIME_STEP_TOTAL
             spacecraftPos = planet1Pos;
             spacecraftVel = planet1Vel;
         elseif (i-1)*DAYS_PER_TIME_STEP+j == TACC_1
-            spacecraftAcc = A_1;
+            spacecraftAcc = spacecraftVel/norm(spacecraftVel)*A_1;
             spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
         elseif (i-1)*DAYS_PER_TIME_STEP+j == TACC_2
-            spacecraftAcc = A_2;
+            spacecraftAcc = spacecraftVel/norm(spacecraftVel)*A_2;
             spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
         elseif (i-1)*DAYS_PER_TIME_STEP+j == TACC_3
-            spacecraftAcc = A_3;
+            spacecraftAcc = spacecraftVel/norm(spacecraftVel)*A_3;
             spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
         else
             spacecraftPos = updatePosition(spacecraftPos,spacecraftVel);
@@ -174,7 +172,7 @@ for i=1:TIME_STEP_TOTAL
             gm = gm + calculateGravity(spacecraftPos,planet4Pos,spacecraftM,planet4M);
             spacecraftAcc = updateAcceleration(spacecraftM,gm);
             spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
-            disp(norm(spacecraftPos-planet2Pos))
+            disp(norm(spacecraftPos-planet1Pos));
         end
     end
 end
