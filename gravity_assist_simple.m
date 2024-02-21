@@ -57,8 +57,8 @@ planetAcc = [0,0,0];
 
 % animation
 
-curve1 = animatedline('LineWidth',1);
-curve2 = animatedline('LineWidth',1);
+curve1 = animatedline('LineWidth',1,'Color','red');
+curve2 = animatedline('LineWidth',1,'Color','blue');
 set(gca,'XLim',[-1e+10,1e+10],'YLim',[-1e+10,1e+10],'ZLim',[-1e+10,1e+10]);
 
 hold on;
