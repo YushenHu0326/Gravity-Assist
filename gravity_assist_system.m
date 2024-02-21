@@ -15,6 +15,16 @@ TIME_STEP = 60*60*24;
 
 DAYS_PER_TIME_STEP = 30;
 
+TACC_1 = 1;
+TACC_2 = -1;
+TACC_3 = -1;
+TACC_4 = -1;
+
+A_1 = [1e-8,0,0];
+A_2 = 1e-2;
+A_3 = 1e-2;
+A_4 = 1e-2;
+
 % helper functions
 
 function gravity = calculateGravity(p1,p2,m,M)
@@ -65,13 +75,13 @@ planet1Pos = [-planet1Res,0,0];
 planet1Vel = [0,-sqrt(G*starM/planet1Res),0];
 planet1Acc = [0,0,0];
 
-planet2Res = 0.5*(sqrt(2*G*starM)*4331*24*60*60/pi)^(2/3); 
+planet2Res = 0.5*(sqrt(2*G*starM)*3753*24*60*60/pi)^(2/3); 
 planet2M = 1898e+24;
 planet2Pos = [-planet2Res,0,0];
 planet2Vel = [0,-sqrt(G*starM/planet2Res),0];
 planet2Acc = [0,0,0];
 
-planet3Res = 0.5*(sqrt(2*G*starM)*10747*24*60*60/pi)^(2/3); 
+planet3Res = 0.5*(sqrt(2*G*starM)*12600*24*60*60/pi)^(2/3); 
 planet3M = 568e+24;
 planet3Pos = [-planet3Res,0,0];
 planet3Vel = [0,-sqrt(G*starM/planet3Res),0];
@@ -86,11 +96,14 @@ planet4Acc = [0,0,0];
 % animation
 
 curve1 = animatedline('LineWidth',1,'Color','red');
-curve2 = animatedline('LineWidth',1,'Color','blue');
+curve2 = animatedline('LineWidth',1,'Color','cyan');
 curve3 = animatedline('LineWidth',1,'Color','yellow');
 curve4 = animatedline('LineWidth',1,'Color','green');
 curve5 = animatedline('LineWidth',1,'Color','magenta');
 set(gca,'XLim',[-5e+12,5e+12],'YLim',[-5e+12,5e+12],'ZLim',[-5e+12,5e+12]);
+set(gca,"Color",[0.2,0.2,0.2]);
+set(gca,"XColor",[1,1,1]);
+set(gca,"YColor",[1,1,1]);
 
 hold on;
 grid on;
@@ -103,7 +116,7 @@ for i=1:TIME_STEP_TOTAL
     addpoints(curve5,spacecraftPos(1),spacecraftPos(2),spacecraftPos(3));
 
     head1 = scatter3(planet1Pos(1),planet1Pos(2),planet1Pos(3),5,'red');
-    head2 = scatter3(planet2Pos(1),planet2Pos(2),planet2Pos(3),10,'blue');
+    head2 = scatter3(planet2Pos(1),planet2Pos(2),planet2Pos(3),10,'cyan');
     head3 = scatter3(planet3Pos(1),planet3Pos(2),planet3Pos(3),50,'yellow');
     head4 = scatter3(planet4Pos(1),planet4Pos(2),planet4Pos(3),100,'green');
     head5 = scatter3(spacecraftPos(1),spacecraftPos(2),spacecraftPos(3),2,'magenta');
@@ -119,7 +132,7 @@ for i=1:TIME_STEP_TOTAL
         delete(head5);
     end
     
-    for j =1:DAYS_PER_TIME_STEP
+    for j = 1:DAYS_PER_TIME_STEP
         planet1Pos = updatePosition(planet1Pos,planet1Vel);
         planet2Pos = updatePosition(planet2Pos,planet2Vel);
         planet3Pos = updatePosition(planet3Pos,planet3Vel);
@@ -140,15 +153,29 @@ for i=1:TIME_STEP_TOTAL
         planet3Vel = updateVelocity(planet3Vel,planet3Acc);
         planet4Vel = updateVelocity(planet4Vel,planet4Acc);
         
-        spacecraftPos = updatePosition(spacecraftPos,spacecraftVel);
-        gm = calculateGravity(spacecraftPos,starPos,spacecraftM,starM);
-        %gm = gm + calculateGravity(spacecraftPos,planet1Pos,spacecraftM,planet1M);
-        gm = gm + calculateGravity(spacecraftPos,planet2Pos,spacecraftM,planet2M);
-        gm = gm + calculateGravity(spacecraftPos,planet3Pos,spacecraftM,planet3M);
-        gm = gm + calculateGravity(spacecraftPos,planet4Pos,spacecraftM,planet4M);
-        spacecraftAcc = updateAcceleration(spacecraftM,gm);
-        spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
-        %disp(spacecraftPos)
+        if (i-1)*DAYS_PER_TIME_STEP+j < TACC_1
+            spacecraftPos = planet1Pos;
+            spacecraftVel = planet1Vel;
+        elseif (i-1)*DAYS_PER_TIME_STEP+j == TACC_1
+            spacecraftAcc = A_1;
+            spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
+        elseif (i-1)*DAYS_PER_TIME_STEP+j == TACC_2
+            spacecraftAcc = A_2;
+            spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
+        elseif (i-1)*DAYS_PER_TIME_STEP+j == TACC_3
+            spacecraftAcc = A_3;
+            spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
+        else
+            spacecraftPos = updatePosition(spacecraftPos,spacecraftVel);
+            gm = calculateGravity(spacecraftPos,starPos,spacecraftM,starM);
+            gm = gm + calculateGravity(spacecraftPos,planet1Pos,spacecraftM,planet1M);
+            gm = gm + calculateGravity(spacecraftPos,planet2Pos,spacecraftM,planet2M);
+            gm = gm + calculateGravity(spacecraftPos,planet3Pos,spacecraftM,planet3M);
+            gm = gm + calculateGravity(spacecraftPos,planet4Pos,spacecraftM,planet4M);
+            spacecraftAcc = updateAcceleration(spacecraftM,gm);
+            spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
+            disp(norm(spacecraftPos-planet2Pos))
+        end
     end
 end
 
