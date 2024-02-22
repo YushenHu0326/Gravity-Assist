@@ -13,19 +13,20 @@ TIME_STEP_TOTAL = 1000;
 
 TIME_STEP = 60*60*24;
 
-DAYS_PER_TIME_STEP = 10;
+DAYS_PER_TIME_STEP = 20;
 
 TACC_1 = 290;
-TACC_2 = -1;
-TACC_3 = -1;
-TACC_4 = -1;
+TACC_2 = 1300;
 
 A_1 = 0.1;
-A_2 = 0.1;
-A_3 = 0.1;
-A_4 = 0.1;
+A_2 = 0.03;
 
 % helper functions
+
+function proj = vec2vecProj(a,b)
+    p = dot(a,b)/(norm(b)*norm(b));
+    proj = p*b;
+end
 
 function gravity = calculateGravity(p1,p2,m,M)
     % delta in position (million km)
@@ -48,6 +49,10 @@ end
 function p = updatePosition(p0,v)
     % calculate position after a day
     p = p0+v*TIME_STEP;
+end
+
+function w = updateWork(w0,f,d,dir)
+    w = w0 + vec2vecProj(f,dir)*norm(vec2vecProj(d,dir));
 end
 
 % properties
@@ -73,23 +78,51 @@ planet1Pos = [-planet1Res,0,0];
 planet1Vel = [0,-sqrt(G*starM/planet1Res),0];
 planet1Acc = [0,0,0];
 
+for i = 1:53
+    gM1 = calculateGravity(planet1Pos,starPos,planet1M,starM);
+    planet1Acc = updateAcceleration(planet1M,gM1);
+    planet1Vel = updateVelocity(planet1Vel,planet1Acc);
+    planet1Pos = updatePosition(planet1Pos,planet1Vel);
+end
+
 planet2Res = 0.5*(sqrt(2*G*starM)*4331*24*60*60/pi)^(2/3); 
 planet2M = 1898e+24;
 planet2Pos = [-planet2Res,0,0];
 planet2Vel = [0,-sqrt(G*starM/planet2Res),0];
 planet2Acc = [0,0,0];
 
+for i = 1:1732
+    gM2 = calculateGravity(planet2Pos,starPos,planet2M,starM);
+    planet2Acc = updateAcceleration(planet2M,gM2);
+    planet2Vel = updateVelocity(planet2Vel,planet2Acc);
+    planet2Pos = updatePosition(planet2Pos,planet2Vel);
+end
+
 planet3Res = 0.5*(sqrt(2*G*starM)*10747*24*60*60/pi)^(2/3); 
 planet3M = 568e+24;
-planet3Pos = [-planet3Res,0,0];
-planet3Vel = [0,-sqrt(G*starM/planet3Res),0];
+planet3Pos = [0,-planet3Res,0];
+planet3Vel = [sqrt(G*starM/planet3Res),0,0];
 planet3Acc = [0,0,0];
+
+for i = 1:6757
+    gM3 = calculateGravity(planet3Pos,starPos,planet3M,starM);
+    planet3Acc = updateAcceleration(planet3M,gM3);
+    planet3Vel = updateVelocity(planet3Vel,planet3Acc);
+    planet3Pos = updatePosition(planet3Pos,planet3Vel);
+end
 
 planet4Res = 0.5*(sqrt(2*G*starM)*30589*24*60*60/pi)^(2/3); 
 planet4M = 86.8e+24;
-planet4Pos = [-planet4Res,0,0];
-planet4Vel = [0,-sqrt(G*starM/planet4Res),0];
+planet4Pos = [planet4Res,0,0];
+planet4Vel = [0,sqrt(G*starM/planet4Res),0];
 planet4Acc = [0,0,0];
+
+for i = 1:12235
+    gM4 = calculateGravity(planet4Pos,starPos,planet4M,starM);
+    planet4Acc = updateAcceleration(planet4M,gM4);
+    planet4Vel = updateVelocity(planet4Vel,planet4Acc);
+    planet4Pos = updatePosition(planet4Pos,planet4Vel);
+end
 
 % animation
 
@@ -151,6 +184,10 @@ for i=1:TIME_STEP_TOTAL
         planet3Vel = updateVelocity(planet3Vel,planet3Acc);
         planet4Vel = updateVelocity(planet4Vel,planet4Acc);
         
+        %disp(norm(spacecraftPos-planet2Pos))
+        %disp((i-1)*DAYS_PER_TIME_STEP+j)
+        %disp(norm(calculateGravity(spacecraftPos,planet3Pos,spacecraftM,planet3M)))
+
         if (i-1)*DAYS_PER_TIME_STEP+j < TACC_1
             spacecraftPos = planet1Pos;
             spacecraftVel = planet1Vel;
@@ -159,9 +196,6 @@ for i=1:TIME_STEP_TOTAL
             spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
         elseif (i-1)*DAYS_PER_TIME_STEP+j == TACC_2
             spacecraftAcc = spacecraftVel/norm(spacecraftVel)*A_2;
-            spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
-        elseif (i-1)*DAYS_PER_TIME_STEP+j == TACC_3
-            spacecraftAcc = spacecraftVel/norm(spacecraftVel)*A_3;
             spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
         else
             spacecraftPos = updatePosition(spacecraftPos,spacecraftVel);
@@ -172,7 +206,6 @@ for i=1:TIME_STEP_TOTAL
             gm = gm + calculateGravity(spacecraftPos,planet4Pos,spacecraftM,planet4M);
             spacecraftAcc = updateAcceleration(spacecraftM,gm);
             spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
-            disp(norm(spacecraftPos-planet1Pos));
         end
     end
 end
