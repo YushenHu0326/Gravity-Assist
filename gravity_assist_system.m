@@ -15,11 +15,13 @@ TIME_STEP = 60*60*24;
 
 DAYS_PER_TIME_STEP = 20;
 
-TACC_1 = 290;
+TACC_1 = 2400;
 TACC_2 = 1300;
 
 A_1 = 0.1;
+A_1_a = [0,0,0];
 A_2 = 0.03;
+A_2_a = [0,0,0];
 
 % helper functions
 
@@ -164,6 +166,7 @@ for i=1:TIME_STEP_TOTAL
     end
     
     for j = 1:DAYS_PER_TIME_STEP
+        disp((i-1)*DAYS_PER_TIME_STEP+j)
         planet1Pos = updatePosition(planet1Pos,planet1Vel);
         planet2Pos = updatePosition(planet2Pos,planet2Vel);
         planet3Pos = updatePosition(planet3Pos,planet3Vel);
@@ -193,9 +196,11 @@ for i=1:TIME_STEP_TOTAL
             spacecraftVel = planet1Vel;
         elseif (i-1)*DAYS_PER_TIME_STEP+j == TACC_1
             spacecraftAcc = spacecraftVel/norm(spacecraftVel)*A_1;
+            spacecraftAcc = spacecraftAcc + A_1_a;
             spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
         elseif (i-1)*DAYS_PER_TIME_STEP+j == TACC_2
             spacecraftAcc = spacecraftVel/norm(spacecraftVel)*A_2;
+            spacecraftAcc = spacecraftAcc + A_2_a;
             spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
         else
             spacecraftPos = updatePosition(spacecraftPos,spacecraftVel);
