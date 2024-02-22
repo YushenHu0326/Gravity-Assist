@@ -18,10 +18,10 @@ DAYS_PER_TIME_STEP = 20;
 TACC_1 = 2400;
 TACC_2 = 5300;
 
-A_1 = 0.1;
-A_1_d = 0;
+A_1 = 0.0;
+A_1_s = 0.1;
 A_2 = 0.03;
-A_2_d = 0;
+A_2_s = 0;
 
 % helper functions
 
@@ -30,8 +30,8 @@ function proj = vec2vecProj(a,b)
     proj = p*b;
 end
 
-function a = sideBoost(a0,d)
-    s = cross(a0/norm(a0),[0,0,1])*d;
+function a = sideBoost(a0,v,d)
+    s = cross(v/norm(v),[0,0,1])*d;
     a = a0 + s;
 end
 
@@ -201,11 +201,11 @@ for i=1:TIME_STEP_TOTAL
             spacecraftVel = planet1Vel;
         elseif (i-1)*DAYS_PER_TIME_STEP+j == TACC_1
             spacecraftAcc = spacecraftVel/norm(spacecraftVel)*A_1;
-            spacecraftAcc = sideBoost(spacecraftAcc,A_1_d);
+            spacecraftAcc = sideBoost(spacecraftAcc,spacecraftVel,A_1_s);
             spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
         elseif (i-1)*DAYS_PER_TIME_STEP+j == TACC_2
             spacecraftAcc = spacecraftVel/norm(spacecraftVel)*A_2;
-            spacecraftAcc = sideBoost(spacecraftAcc,A_2_d);
+            spacecraftAcc = sideBoost(spacecraftAcc,spacecraftVel,A_2_s);
             spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
         else
             spacecraftPos = updatePosition(spacecraftPos,spacecraftVel);
