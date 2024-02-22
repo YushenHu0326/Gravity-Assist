@@ -16,11 +16,11 @@ TIME_STEP = 60*60*24;
 DAYS_PER_TIME_STEP = 20;
 
 TACC_1 = 2390;
-TACC_2 = 3550;
+TACC_2 = -3580;
 
-A_1 = 0.1;
+A_1 = 0.10028;
 A_1_s = 0.0;
-A_2 = 0.04;
+A_2 = 0.044;
 A_2_s = 0.08;
 
 % helper functions
@@ -193,9 +193,9 @@ for i=1:TIME_STEP_TOTAL
         planet3Vel = updateVelocity(planet3Vel,planet3Acc);
         planet4Vel = updateVelocity(planet4Vel,planet4Acc);
         
-        %disp(norm(spacecraftPos-planet2Pos))
+        disp(norm(spacecraftPos-planet2Pos))
         %disp((i-1)*DAYS_PER_TIME_STEP+j)
-        disp(norm(calculateGravity(spacecraftPos,planet2Pos,spacecraftM,planet2M)))
+        %disp(norm(calculateGravity(spacecraftPos,planet2Pos,spacecraftM,planet2M)))
 
         if (i-1)*DAYS_PER_TIME_STEP+j < TACC_1
             spacecraftPos = planet1Pos;
