@@ -16,18 +16,23 @@ TIME_STEP = 60*60*24;
 DAYS_PER_TIME_STEP = 20;
 
 TACC_1 = 2400;
-TACC_2 = 1300;
+TACC_2 = 5300;
 
 A_1 = 0.1;
-A_1_a = [0,0,0];
+A_1_d = 0;
 A_2 = 0.03;
-A_2_a = [0,0,0];
+A_2_d = 0;
 
 % helper functions
 
 function proj = vec2vecProj(a,b)
     p = dot(a,b)/(norm(b)*norm(b));
     proj = p*b;
+end
+
+function a = sideBoost(a0,d)
+    s = cross(a0/norm(a0),[0,0,1])*d;
+    a = a0 + s;
 end
 
 function gravity = calculateGravity(p1,p2,m,M)
@@ -196,11 +201,11 @@ for i=1:TIME_STEP_TOTAL
             spacecraftVel = planet1Vel;
         elseif (i-1)*DAYS_PER_TIME_STEP+j == TACC_1
             spacecraftAcc = spacecraftVel/norm(spacecraftVel)*A_1;
-            spacecraftAcc = spacecraftAcc + A_1_a;
+            spacecraftAcc = sideBoost(spacecraftAcc,A_1_d);
             spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
         elseif (i-1)*DAYS_PER_TIME_STEP+j == TACC_2
             spacecraftAcc = spacecraftVel/norm(spacecraftVel)*A_2;
-            spacecraftAcc = spacecraftAcc + A_2_a;
+            spacecraftAcc = sideBoost(spacecraftAcc,A_2_d);
             spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
         else
             spacecraftPos = updatePosition(spacecraftPos,spacecraftVel);
