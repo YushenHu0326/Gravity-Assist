@@ -247,6 +247,12 @@ for i=1:TIME_STEP_TOTAL
     end
 end
 
+disp("final velocity")
+disp(norm(spacecraftVel))
+
+disp("escape velocity")
+disp(sqrt(2*G*starM/norm(spacecraftPos-starPos)))
+
 X = linspace(1,TIME_STEP_TOTAL*DAYS_PER_TIME_STEP/SLICE,TIME_STEP_TOTAL);
 figure
 plot(X,V)
