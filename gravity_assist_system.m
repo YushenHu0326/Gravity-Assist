@@ -5,25 +5,23 @@ close all;
 
 % constant
 
-SLICE = 1000;
+SLICE = 300;
 
 % in Nm^2/kg^2
 G = 6.6743e-11;
 
 % in days
-TIME_STEP_TOTAL = 1000;
+TIME_STEP_TOTAL = 200;
 
-TIME_STEP = 60*60*24/SLICE;
+DELTAT = 60*60*24/SLICE;
 
 DAYS_PER_TIME_STEP = 20*SLICE;
 
-TACC_1 = 390*SLICE;
-TACC_2 = -3580*SLICE;
+%TACC = 390*SLICE;
+TACC = 1;
 
-A_1 = 0.10185*SLICE;
-A_1_s = 0.0;
-A_2 = 0.044;
-A_2_s = 0.08;
+%A = 0.101865*SLICE;
+A = 0.13889*SLICE;
 
 % helper functions
 
@@ -52,16 +50,16 @@ end
 
 function v = updateVelocity(v0,a)
     % calculate velocity in m/s
-    v = v0+a*TIME_STEP;
+    v = v0+a*DELTAT;
 end
 
 function p = updatePosition(p0,v)
     % calculate position after a day
-    p = p0+v*TIME_STEP;
+    p = p0+v*DELTAT;
 end
 
-function w = updateWork(w0,f,d,dir)
-    w = w0 + vec2vecProj(f,dir)*norm(vec2vecProj(d,dir));
+function w = updateWorkSlice(f,d)
+    w = norm(vec2vecProj(f,d))*norm(d)*sign(dot(f,d));
 end
 
 % properties
@@ -150,6 +148,15 @@ hold on;
 grid on;
 
 min_dist = 1e+10;
+V = zeros(1,TIME_STEP_TOTAL);
+WStar = 0;
+wStar = zeros(1,TIME_STEP_TOTAL*DAYS_PER_TIME_STEP);
+W2 = 0;
+w2 = zeros(1,TIME_STEP_TOTAL*DAYS_PER_TIME_STEP);
+W3 = 0;
+w3 = zeros(1,TIME_STEP_TOTAL*DAYS_PER_TIME_STEP);
+W4 = 0;
+w4 = zeros(1,TIME_STEP_TOTAL*DAYS_PER_TIME_STEP);
 
 for i=1:TIME_STEP_TOTAL
     addpoints(curve1,planet1Pos(1),planet1Pos(2),planet1Pos(3));
@@ -175,9 +182,10 @@ for i=1:TIME_STEP_TOTAL
         delete(head4);
         delete(head5);
     end
+
+    V(1,i) = norm(spacecraftVel);
     
     for j = 1:DAYS_PER_TIME_STEP
-        %disp((i-1)*DAYS_PER_TIME_STEP+j)
         planet1Pos = updatePosition(planet1Pos,planet1Vel);
         planet2Pos = updatePosition(planet2Pos,planet2Vel);
         planet3Pos = updatePosition(planet3Pos,planet3Vel);
@@ -198,29 +206,28 @@ for i=1:TIME_STEP_TOTAL
         planet3Vel = updateVelocity(planet3Vel,planet3Acc);
         planet4Vel = updateVelocity(planet4Vel,planet4Acc);
         
-        %if mod((i-1)*DAYS_PER_TIME_STEP+j,SLICE) == 0
+        if mod((i-1)*DAYS_PER_TIME_STEP+j,200) == 0
+            %V(1,(i-1)*DAYS_PER_TIME_STEP+j/20000+1) = norm(spacecraftVel);
+            %disp(norm(spacecraftVel))
             %disp(norm(spacecraftVel));
             %disp(norm(spacecraftPos-planet2Pos))
             %disp((i-1)*DAYS_PER_TIME_STEP+j)
             %disp(norm(calculateGravity(spacecraftPos,planet2Pos,spacecraftM,planet2M)))
-        %end
+        end
+        
         if norm(spacecraftPos-planet2Pos) < min_dist
             min_dist = norm(spacecraftPos-planet2Pos);
-            disp(min_dist)
+            %disp(min_dist)
         end
 
-        if (i-1)*DAYS_PER_TIME_STEP+j < TACC_1
+        if (i-1)*DAYS_PER_TIME_STEP+j < TACC
             spacecraftPos = planet1Pos;
             spacecraftVel = planet1Vel;
-        elseif (i-1)*DAYS_PER_TIME_STEP+j == TACC_1
-            spacecraftAcc = spacecraftVel/norm(spacecraftVel)*A_1;
-            spacecraftAcc = sideBoost(spacecraftAcc,spacecraftVel,A_1_s);
-            spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
-        elseif (i-1)*DAYS_PER_TIME_STEP+j == TACC_2
-            spacecraftAcc = spacecraftVel/norm(spacecraftVel)*A_2;
-            spacecraftAcc = sideBoost(spacecraftAcc,spacecraftVel,A_2_s);
+        elseif (i-1)*DAYS_PER_TIME_STEP+j == TACC
+            spacecraftAcc = spacecraftVel/norm(spacecraftVel)*A;
             spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
         else
+            previousSpacecraftPos = spacecraftPos;
             spacecraftPos = updatePosition(spacecraftPos,spacecraftVel);
             gm = calculateGravity(spacecraftPos,starPos,spacecraftM,starM);
             gm = gm + calculateGravity(spacecraftPos,planet2Pos,spacecraftM,planet2M);
@@ -228,8 +235,42 @@ for i=1:TIME_STEP_TOTAL
             gm = gm + calculateGravity(spacecraftPos,planet4Pos,spacecraftM,planet4M);
             spacecraftAcc = updateAcceleration(spacecraftM,gm);
             spacecraftVel = updateVelocity(spacecraftVel,spacecraftAcc);
+            WStar = updateWorkSlice(calculateGravity(spacecraftPos,starPos,spacecraftM,starM),spacecraftPos-previousSpacecraftPos);
+            W2 = updateWorkSlice(calculateGravity(spacecraftPos,planet2Pos,spacecraftM,planet2M),spacecraftPos-previousSpacecraftPos);
+            W3 = updateWorkSlice(calculateGravity(spacecraftPos,planet3Pos,spacecraftM,planet3M),spacecraftPos-previousSpacecraftPos);
+            W4 = updateWorkSlice(calculateGravity(spacecraftPos,planet4Pos,spacecraftM,planet4M),spacecraftPos-previousSpacecraftPos);
+            wStar(1,(i-1)*DAYS_PER_TIME_STEP+j) = WStar;
+            w2(1,(i-1)*DAYS_PER_TIME_STEP+j) = W2;
+            w3(1,(i-1)*DAYS_PER_TIME_STEP+j) = W3;
+            w4(1,(i-1)*DAYS_PER_TIME_STEP+j) = W4;
         end
     end
 end
+
+X = linspace(1,TIME_STEP_TOTAL*DAYS_PER_TIME_STEP/SLICE,TIME_STEP_TOTAL);
+figure
+plot(X,V)
+grid on
+title("Velocity of the spacecraft over time")
+xlabel("time - days")
+ylabel("velocity - m/s^2")
+
+X = linspace(1,TIME_STEP_TOTAL*DAYS_PER_TIME_STEP/SLICE,TIME_STEP_TOTAL*DAYS_PER_TIME_STEP);
+figure
+grid on
+plot(X,wStar)
+hold on
+plot(X,w2)
+hold on
+plot(X,w3)
+hold on
+plot(X,w4)
+hold off
+title("Works from planets to the spacecraft over time")
+xlabel("time - days")
+ylabel("work - N*m")
+legend("Sun","Jupiter","Saturn","Uranus")
+
+disp(.5*spacecraftM*norm(spacecraftVel)*norm(spacecraftVel)-G*starM*spacecraftM/norm(starPos-spacecraftPos))
 
 end
