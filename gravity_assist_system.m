@@ -17,11 +17,11 @@ DELTAT = 60*60*24/SLICE;
 
 DAYS_PER_TIME_STEP = 20*SLICE;
 
-%TACC = 390*SLICE;
-TACC = 1;
+TACC = 390*SLICE;
+%TACC = 1;
 
-%A = 0.101865*SLICE;
-A = 0.13889*SLICE;
+A = 0.101865*SLICE;
+%A = 0.13889*SLICE;
 
 % helper functions
 
@@ -270,6 +270,13 @@ title("Works from planets to the spacecraft over time")
 xlabel("time - days")
 ylabel("work - N*m")
 legend("Sun","Jupiter","Saturn","Uranus")
+
+figure
+grid on
+plot(w2(1250*SLICE:1350*SLICE))
+title("Works from planets to the spacecraft over time")
+xlabel("time - days")
+ylabel("work - N*m")
 
 disp(.5*spacecraftM*norm(spacecraftVel)*norm(spacecraftVel)-G*starM*spacecraftM/norm(starPos-spacecraftPos))
 
