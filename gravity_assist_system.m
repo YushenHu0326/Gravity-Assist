@@ -5,20 +5,22 @@ close all;
 
 % constant
 
+SLICE = 1000;
+
 % in Nm^2/kg^2
 G = 6.6743e-11;
 
 % in days
 TIME_STEP_TOTAL = 1000;
 
-TIME_STEP = 60*60*24;
+TIME_STEP = 60*60*24/SLICE;
 
-DAYS_PER_TIME_STEP = 20;
+DAYS_PER_TIME_STEP = 20*SLICE;
 
-TACC_1 = 392;
-TACC_2 = -3580;
+TACC_1 = 390*SLICE;
+TACC_2 = -3580*SLICE;
 
-A_1 = 0.10031;
+A_1 = 0.10185*SLICE;
 A_1_s = 0.0;
 A_2 = 0.044;
 A_2_s = 0.08;
@@ -85,7 +87,7 @@ planet1Pos = [-planet1Res,0,0];
 planet1Vel = [0,-sqrt(G*starM/planet1Res),0];
 planet1Acc = [0,0,0];
 
-for i = 1:53
+for i = 1:53*SLICE
     gM1 = calculateGravity(planet1Pos,starPos,planet1M,starM);
     planet1Acc = updateAcceleration(planet1M,gM1);
     planet1Vel = updateVelocity(planet1Vel,planet1Acc);
@@ -99,7 +101,7 @@ planet2Pos = [-planet2Res,0,0];
 planet2Vel = [0,-sqrt(G*starM/planet2Res),0];
 planet2Acc = [0,0,0];
 
-for i = 1:1732
+for i = 1:1732*SLICE
     gM2 = calculateGravity(planet2Pos,starPos,planet2M,starM);
     planet2Acc = updateAcceleration(planet2M,gM2);
     planet2Vel = updateVelocity(planet2Vel,planet2Acc);
@@ -112,7 +114,7 @@ planet3Pos = [0,-planet3Res,0];
 planet3Vel = [sqrt(G*starM/planet3Res),0,0];
 planet3Acc = [0,0,0];
 
-for i = 1:6757
+for i = 1:6757*SLICE
     gM3 = calculateGravity(planet3Pos,starPos,planet3M,starM);
     planet3Acc = updateAcceleration(planet3M,gM3);
     planet3Vel = updateVelocity(planet3Vel,planet3Acc);
@@ -125,7 +127,7 @@ planet4Pos = [planet4Res,0,0];
 planet4Vel = [0,sqrt(G*starM/planet4Res),0];
 planet4Acc = [0,0,0];
 
-for i = 1:12235
+for i = 1:12235*SLICE
     gM4 = calculateGravity(planet4Pos,starPos,planet4M,starM);
     planet4Acc = updateAcceleration(planet4M,gM4);
     planet4Vel = updateVelocity(planet4Vel,planet4Acc);
@@ -147,6 +149,8 @@ set(gca,"YColor",[1,1,1]);
 hold on;
 grid on;
 
+min_dist = 1e+10;
+
 for i=1:TIME_STEP_TOTAL
     addpoints(curve1,planet1Pos(1),planet1Pos(2),planet1Pos(3));
     addpoints(curve2,planet2Pos(1),planet2Pos(2),planet2Pos(3));
@@ -159,6 +163,7 @@ for i=1:TIME_STEP_TOTAL
     head3 = scatter3(planet3Pos(1),planet3Pos(2),planet3Pos(3),50,'yellow');
     head4 = scatter3(planet4Pos(1),planet4Pos(2),planet4Pos(3),100,'green');
     head5 = scatter3(spacecraftPos(1),spacecraftPos(2),spacecraftPos(3),2,'magenta');
+    scatter3(0,0,0,20,[1,1,1]);
 
     drawnow
     pause(0.01);
@@ -193,9 +198,16 @@ for i=1:TIME_STEP_TOTAL
         planet3Vel = updateVelocity(planet3Vel,planet3Acc);
         planet4Vel = updateVelocity(planet4Vel,planet4Acc);
         
-        disp(norm(spacecraftPos-planet2Pos))
-        %disp((i-1)*DAYS_PER_TIME_STEP+j)
-        %disp(norm(calculateGravity(spacecraftPos,planet2Pos,spacecraftM,planet2M)))
+        %if mod((i-1)*DAYS_PER_TIME_STEP+j,SLICE) == 0
+            %disp(norm(spacecraftVel));
+            %disp(norm(spacecraftPos-planet2Pos))
+            %disp((i-1)*DAYS_PER_TIME_STEP+j)
+            %disp(norm(calculateGravity(spacecraftPos,planet2Pos,spacecraftM,planet2M)))
+        %end
+        if norm(spacecraftPos-planet2Pos) < min_dist
+            min_dist = norm(spacecraftPos-planet2Pos);
+            disp(min_dist)
+        end
 
         if (i-1)*DAYS_PER_TIME_STEP+j < TACC_1
             spacecraftPos = planet1Pos;
@@ -211,7 +223,6 @@ for i=1:TIME_STEP_TOTAL
         else
             spacecraftPos = updatePosition(spacecraftPos,spacecraftVel);
             gm = calculateGravity(spacecraftPos,starPos,spacecraftM,starM);
-            gm = gm + calculateGravity(spacecraftPos,planet1Pos,spacecraftM,planet1M);
             gm = gm + calculateGravity(spacecraftPos,planet2Pos,spacecraftM,planet2M);
             gm = gm + calculateGravity(spacecraftPos,planet3Pos,spacecraftM,planet3M);
             gm = gm + calculateGravity(spacecraftPos,planet4Pos,spacecraftM,planet4M);
