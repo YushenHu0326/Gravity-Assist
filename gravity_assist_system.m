@@ -11,7 +11,7 @@ SLICE = 300;
 G = 6.6743e-11;
 
 % in days
-TIME_STEP_TOTAL = 200;
+TIME_STEP_TOTAL = 300;
 
 DELTAT = 60*60*24/SLICE;
 
@@ -20,7 +20,8 @@ DAYS_PER_TIME_STEP = 20*SLICE;
 TACC = 390*SLICE;
 %TACC = 1;
 
-A = 0.101865*SLICE;
+%A = 0.10187708*SLICE;
+A = 0.101775*SLICE;
 %A = 0.13889*SLICE;
 
 % helper functions
@@ -164,13 +165,15 @@ for i=1:TIME_STEP_TOTAL
     addpoints(curve3,planet3Pos(1),planet3Pos(2),planet3Pos(3));
     addpoints(curve4,planet4Pos(1),planet4Pos(2),planet4Pos(3));
     addpoints(curve5,spacecraftPos(1),spacecraftPos(2),spacecraftPos(3));
-
+    
     head1 = scatter3(planet1Pos(1),planet1Pos(2),planet1Pos(3),5,'red');
     head2 = scatter3(planet2Pos(1),planet2Pos(2),planet2Pos(3),10,'cyan');
     head3 = scatter3(planet3Pos(1),planet3Pos(2),planet3Pos(3),50,'yellow');
     head4 = scatter3(planet4Pos(1),planet4Pos(2),planet4Pos(3),100,'green');
     head5 = scatter3(spacecraftPos(1),spacecraftPos(2),spacecraftPos(3),2,'magenta');
-    scatter3(0,0,0,20,[1,1,1]);
+    head6 = scatter3(0,0,0,20,[1,1,1]);
+
+    legend([head6,head1,head2,head3,head4,head5],"Sun","Earth","Jupiter","Saturn","Uranus","Spacecraft")
 
     drawnow
     pause(0.01);
@@ -217,7 +220,7 @@ for i=1:TIME_STEP_TOTAL
         
         if norm(spacecraftPos-planet2Pos) < min_dist
             min_dist = norm(spacecraftPos-planet2Pos);
-            %disp(min_dist)
+            disp(min_dist)
         end
 
         if (i-1)*DAYS_PER_TIME_STEP+j < TACC
@@ -263,7 +266,6 @@ ylabel("velocity - m/s^2")
 
 X = linspace(1,TIME_STEP_TOTAL*DAYS_PER_TIME_STEP/SLICE,TIME_STEP_TOTAL*DAYS_PER_TIME_STEP);
 figure
-grid on
 plot(X,wStar)
 hold on
 plot(X,w2)
@@ -272,17 +274,17 @@ plot(X,w3)
 hold on
 plot(X,w4)
 hold off
+grid on
 title("Works from planets to the spacecraft over time")
 xlabel("time - days")
 ylabel("work - N*m")
 legend("Sun","Jupiter","Saturn","Uranus")
 
 figure
-grid on
-plot(w2(1250*SLICE:1350*SLICE))
-title("Works from planets to the spacecraft over time")
-xlabel("time - days")
+plot(w2(1285*SLICE:1287*SLICE))
+title("day 1285 to day 1287")
 ylabel("work - N*m")
+grid on
 
 disp(.5*spacecraftM*norm(spacecraftVel)*norm(spacecraftVel)-G*starM*spacecraftM/norm(starPos-spacecraftPos))
 
